@@ -1,0 +1,25 @@
+services:
+  db:
+    container_name: std-form073
+    image: postgres:latest
+    restart: always
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: pass
+      POSTGRES_DB: mystddb
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  adminer:
+    container_name: pg-adminer1
+    image: adminer:latest
+    ports:
+      - '8080:8080'
+    depends_on:
+      - db
+
+
+volumes:
+ postgres_data:
