@@ -28,3 +28,13 @@ model student {
 
 
 }
+
+
+model User { 
+id        String   @id @default(uuid())      // primary key แบบ UUID ช่วยป้องกันการเดา id ง่ายๆ 
+username  String   @unique
+password  String                              // เก็บเฉพาะรหัสผ่านที่ 'hash' แล้วเท่านั้น 
+role String   @default("user")          // "user" หรือ "admin" ใช้สําหรับ RBAC 
+createdAt DateTime @default(now())           // บันทึกเวลาสร้าง 
+updatedAt DateTime @updatedAt
+} 

@@ -1,6 +1,8 @@
 // prisma/seed.ts 
 import { PrismaClient } from "@prisma/client"; 
 const prisma = new PrismaClient(); 
+ import { hash } from 'bcryptjs';
+
  
 async function seedSTD() {
   const students = [
@@ -54,6 +56,31 @@ async function seedSTD() {
 async function main() { 
   await seedSTD(); 
   console.log(" Seeded data successfully!"); 
+
+    const adminUsername = 'admin';
+  const adminPassword = 'admin123'; // ปกติควรเก็บใน .env แล้วอ่านจาก process.env
+
+  // เช็คก่อนว่ามี admin หรือยัง
+  const existingAdmin = await prisma.user.findUnique({
+    where: { username: adminUsername },
+  });
+
+  if (existingAdmin) {
+    console.log('Admin user already exists');
+    return;
+  }
+
+  const hashedPassword = await hash(adminPassword, 10);
+
+  const adminUser = await prisma.user.create({
+    data: {
+      username: adminUsername,
+      password: hashedPassword,
+      role: 'admin',
+    },
+  });
+
+  console.log('✅ Admin user created:', adminUser);
 } 
 
 
