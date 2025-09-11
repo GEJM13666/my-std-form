@@ -47,8 +47,12 @@ export default function ProfilePage() {
       setCurrentPassword('')
       setNewPassword('')
       setConfirmPassword('')
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err) {
+      if (err instanceof Error) {
+        setError(err.message)
+      } else {
+        setError('An unknown error occurred.')
+      }
     } finally {
       setIsLoading(false)
     }
@@ -70,7 +74,7 @@ export default function ProfilePage() {
       <div className="p-8 bg-white rounded-lg shadow-md w-full max-w-md">
         <h1 className="text-2xl font-bold mb-2 text-center">Profile</h1>
         <p className="text-center text-gray-600 mb-6">
-          เปลี่ยนรหัสผ่านสำหรับ <strong>{(session?.user as any)?.username}</strong>
+          เปลี่ยนรหัสผ่านสำหรับ <strong>{session?.user?.username}</strong>
         </p>
         <form onSubmit={handleSubmit}>
           <div className="mb-4">

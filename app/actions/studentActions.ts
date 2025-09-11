@@ -96,7 +96,7 @@ export async function updateStudent(id: number, formData: FormData) {
     revalidatePath(`/students/${id}`); // อัปเดตหน้ารายละเอียด (ถ้ามี)
     return { success: "Student updated successfully!" };
 
-  } catch (error) {
+  } catch (_error) {
     return { error: "Something went wrong, could not update student." };
   }
 }

@@ -6,11 +6,21 @@ import { useFormStatus } from "react-dom";
 import { createStudent, updateStudent } from "@/app/actions/studentActions";
 import { Dialog, DialogActions, DialogContent, DialogTitle, Button, TextField } from "@mui/material";
 
+// กำหนด Type สำหรับข้อมูลนักศึกษาที่ใช้ในฟอร์ม
+interface StudentData {
+  id: number;
+  firstName: string;
+  lastName: string;
+  major: string;
+  faculty: string;
+  email: string;
+  phone: string;
+}
 // Add the onSuccess prop
 interface AdmissionFormProps {
   open: boolean;
   onClose: () => void;
-  studentData?: any; // Optional prop for editing
+  studentData?: StudentData | null; // Optional prop for editing
   onSuccess: () => void; // Function to be called after a successful submit
 }
 

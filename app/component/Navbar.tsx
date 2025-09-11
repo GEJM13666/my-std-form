@@ -9,50 +9,24 @@ import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
 import SchoolIcon from '@mui/icons-material/School';
 import { AdmissionForm } from './AdmissionForm'; // Import the AdmissionForm modal
-import { getAllStudents } from '@/app/actions/studentActions'; // Import getAllStudents function
 
 export default function Navbar() {
   const [openModal, setOpenModal] = React.useState<boolean>(false);
-  const [openEditModal, setOpenEditModal] = React.useState<boolean>(false);
-  const [selectedStudent, setSelectedStudent] = React.useState<any | null>(null);
-  const [students, setStudents] = React.useState<any[]>([]);  // To hold students data
 
   // Open and close modal for adding new student
   const handleOpenModal = () => {
-    setSelectedStudent(null);  // Clear selected student when adding a new one
     setOpenModal(true);
   };
 
   const handleCloseModal = () => {
     setOpenModal(false);
   };
-
-  // Open and close modal for editing a student
-  const handleOpenEditModal = (student: any) => {
-    setSelectedStudent(student);
-    setOpenEditModal(true);
-  };
-
-  const handleCloseEditModal = () => {
-    setOpenEditModal(false);
-    setSelectedStudent(null);
-  };
-
-  // Fetch the students after a successful create or update
-  const fetchStudents = async () => {
-    try {
-      const data = await getAllStudents();
-      setStudents(data);
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  // Callback passed to AdmissionForm to refresh the student list after success
+  
+  // Callback to refresh the page after a successful submission,
+  // which will cause StudentList to refetch its data.
   const handleSuccess = () => {
-    fetchStudents();  // Refresh the student list
-    handleCloseModal();  // Close the modal
-    handleCloseEditModal();  // Close the edit modal
+    handleCloseModal();
+    window.location.reload();
   };
 
   return (
@@ -75,10 +49,9 @@ export default function Navbar() {
 
       {/* Admission Form Modal */}
       <AdmissionForm
-        open={openModal || openEditModal}  // Modal is open if either Add or Edit modal is triggered
+        open={openModal}
         onClose={handleCloseModal}  // Close the modal when canceled
-        studentData={selectedStudent}  // Pass selected student data for editing
-        onSuccess={handleSuccess}  // Trigger data refresh on success
+        onSuccess={handleSuccess}  // Trigger action on success
       />
     </Box>
   );
