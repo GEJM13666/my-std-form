@@ -1,8 +1,10 @@
-import NextAuth from 'next-auth' 
+import NextAuth, { AuthOptions } from 'next-auth' 
 import Credentials from 'next-auth/providers/credentials' 
 import { prisma } from '@/lib/prisma' 
+import { User as PrismaUser } from '@prisma/client'
 import bcrypt from 'bcryptjs' 
-export const authOptions = { 
+
+export const authOptions: AuthOptions = { 
 session: { strategy: 'jwt' as const }, // ใช้ JWT ในคุกกี้ 
 providers: [ 
 Credentials({ 
@@ -13,7 +15,7 @@ password: { label: 'Password', type: 'password' },
 }, 
 async authorize(credentials) { 
 // 1) ค้นหาผู้ใช้ 
-const user = await prisma.user.findUnique({ 
+const user: PrismaUser | null = await prisma.user.findUnique({ 
 where: { username: credentials?.username }, 
 }) 
 if (!user) return null 
@@ -21,27 +23,26 @@ if (!user) return null
 const ok = await bcrypt.compare(credentials!.password, user.password) 
 if (!ok) return null 
 // 3) คืนเฉพาะข้อมูลจําเป็น (ห้ามคืน password) 
-return { id: user.id, username: user.username, role: user.role } 
+return { id: user.id, username: user.username, role: user.role }
 }, 
 }), 
  ], 
   callbacks: { 
     // เพิ่มฟิลด์ลงใน JWT ตอน login สําเร็จ 
-    async jwt({ token, user }: { token: any, user: any }) {
+    async jwt({ token, user }) {
       if (user) { // user is only defined on the first login
-        token.id = (user as any).id 
-        token.username = (user as any).username 
-        token.role = (user as any).role 
+        token.id = user.id 
+        token.username = user.username 
+        token.role = user.role 
       } 
       return token 
     }, 
     // ส่งต่อฟิลด์จาก token → session (client จะอ่านจาก session.user) 
-    async session({ session, token }: { session: any, token: any }) {
-      session.user = { 
-        ...(session.user || {}), 
-        id: token.id as string, 
-        username: token.username as string, 
-        role: token.role as string, 
+    async session({ session, token }) {
+      if (session.user) {
+        session.user.id = token.id as string
+        session.user.username = token.username as string
+        session.user.role = token.role as string
       } 
       return session 
     }, 

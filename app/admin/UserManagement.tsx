@@ -27,8 +27,12 @@ export default function UserManagement() {
       }
       const data = await res.json()
       setUsers(data)
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err) {
+      if (err instanceof Error) {
+        setError(err.message)
+      } else {
+        setError('An unknown error occurred')
+      }
     } finally {
       setIsLoading(false)
     }
@@ -50,8 +54,12 @@ export default function UserManagement() {
         throw new Error(data.error || 'Failed to update role')
       }
       fetchUsers() // Refresh user list
-    } catch (err: any) {
-      alert(`Error: ${err.message}`)
+    } catch (err) {
+      if (err instanceof Error) {
+        alert(`Error: ${err.message}`)
+      } else {
+        alert('An unknown error occurred while updating role.')
+      }
     }
   }
 
@@ -64,8 +72,12 @@ export default function UserManagement() {
           throw new Error(data.error || 'Failed to delete user')
         }
         fetchUsers() // Refresh user list
-      } catch (err: any) {
-        alert(`Error: ${err.message}`)
+      } catch (err) {
+        if (err instanceof Error) {
+          alert(`Error: ${err.message}`)
+        } else {
+          alert('An unknown error occurred while deleting user.')
+        }
       }
     }
   }
@@ -89,14 +101,14 @@ export default function UserManagement() {
             <tr key={user.id} className="hover:bg-gray-50">
               <td className="py-4 px-4 whitespace-nowrap">{user.username}</td>
               <td className="py-4 px-4 whitespace-nowrap"> 
-                <select value={user.role} onChange={(e) => handleRoleChange(user.id, e.target.value as 'admin' | 'user')} disabled={user.id === (session?.user as any)?.id} className="p-1 border rounded-md disabled:bg-gray-200 disabled:cursor-not-allowed">
+                <select value={user.role} onChange={(e) => handleRoleChange(user.id, e.target.value as 'admin' | 'user')} disabled={user.id === session?.user?.id} className="p-1 border rounded-md disabled:bg-gray-200 disabled:cursor-not-allowed">
                   <option value="user">User</option>
                   <option value="admin">Admin</option>
                 </select>
               </td>
               <td className="py-4 px-4 whitespace-nowrap">{new Date(user.createdAt).toLocaleDateString('th-TH')}</td>
               <td className="py-4 px-4 whitespace-nowrap">
-                <button onClick={() => handleDeleteUser(user.id)} disabled={user.id === (session?.user as any)?.id} className="bg-red-600 text-white px-3 py-1 rounded-md text-sm font-medium hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed">Delete</button>
+                <button onClick={() => handleDeleteUser(user.id)} disabled={user.id === session?.user?.id} className="bg-red-600 text-white px-3 py-1 rounded-md text-sm font-medium hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed">Delete</button>
               </td>
             </tr>
           ))}
