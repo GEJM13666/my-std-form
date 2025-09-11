@@ -17,6 +17,24 @@ export const PUT = (async (
 
   try {
     const { role } = await req.json()
+    if (!['admin', 'user', 'teacher', 'student'].includes(role)) {
+      return NextResponse.json({ error: 'Invalid role' }, { status: 400 })
+    }
+
+    // ป้องกันไม่ให้ admin ลดระดับสิทธิ์ของตัวเอง
+    if (session.user.id === id && role !== 'admin') {
+      return NextResponse.json(
+        { error: 'ไม่สามารถลดระดับสิทธิ์ของตนเองได้' },
+        { status: 400 }
+      )
+    }
+
+    const updatedUser = await prisma.user.update({
+      where: { id: id },
+      data: { role: role },
+      select: { id: true, username: true, role: true },
+    })
+    return NextResponse.json(updatedUser)
   } catch (error) {
     console.error('Failed to update user role:', error)
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })

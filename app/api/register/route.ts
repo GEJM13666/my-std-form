@@ -1,38 +1,41 @@
-import { NextResponse } from 'next/server' 
-import { prisma } from '@/lib/prisma' 
-import bcrypt from 'bcryptjs' 
- 
-export async function POST(req: Request) { 
-  try { 
-    const { username, password, role } = await req.json() 
- 
-    // 1) ตรวจข้อมูลเบื้องต้น 
-    if (!username || !password) { 
-      return NextResponse.json({ error: 'username/password ห้ามว่าง' }, { status: 400 }) 
-    } 
- 
-    // 2) ป้องกันชื่อซํ้า 
-    const exists = await prisma.user.findUnique({ where: { username } }) 
-    if (exists) { 
-      return NextResponse.json({ error: 'username นี้ถูกใช้แล้ว' }, { status: 409 }) 
-    } 
- 
-    // 3) เข้ารหัสรหัสผ่าน 
-    const hashed = await bcrypt.hash(password, 10) 
- 
-    // 4) บันทึกผู้ใช้ 
-    const user = await prisma.user.create({ 
-      data: { 
-        username, 
-        password: hashed, 
-        role: role === 'admin' ? 'admin' : 'user', // กันคนสมัครเป็น admin มั่วๆ 
-      }, 
-      select: { id: true, username: true, role: true, createdAt: true }, 
-    }) 
- 
-    return NextResponse.json({ user }, { status: 201 }) 
-  } catch (err) { 
-    console.error(err) 
-    return NextResponse.json({ error: 'เกิดข้อผิดพลาดของเซิร์ฟเวอร์' }, { status: 500 }) 
-  } 
-} 
+import { NextResponse } from 'next/server'
+import { prisma } from '@/lib/prisma'
+import bcrypt from 'bcryptjs'
+
+export async function POST(req: Request) {
+  try {
+    const { username, password, role } = await req.json()
+
+    // 1. ตรวจสอบข้อมูล
+    if (!username || !password || !role) {
+      return NextResponse.json({ error: 'กรุณากรอกข้อมูลให้ครบถ้วน' }, { status: 400 })
+    }
+
+    // 2. ตรวจสอบ Role ที่อนุญาต
+    if (!['teacher', 'student'].includes(role)) {
+      return NextResponse.json({ error: 'Role ไม่ถูกต้อง' }, { status: 400 })
+    }
+
+    // 3. ตรวจสอบว่ามี username นี้ในระบบแล้วหรือยัง
+    const existingUser = await prisma.user.findUnique({
+      where: { username },
+    })
+
+    if (existingUser) {
+      return NextResponse.json({ error: 'ชื่อผู้ใช้นี้ถูกใช้งานแล้ว' }, { status: 409 })
+    }
+
+    // 4. Hash รหัสผ่าน
+    const hashedPassword = await bcrypt.hash(password, 10)
+
+    // 5. สร้างผู้ใช้ใหม่
+    const user = await prisma.user.create({
+      data: { username, password: hashedPassword, role },
+    })
+
+    return NextResponse.json({ message: 'สมัครสมาชิกสำเร็จ', userId: user.id })
+  } catch (error) {
+    console.error('Registration failed:', error)
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
+  }
+}

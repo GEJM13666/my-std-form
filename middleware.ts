@@ -6,8 +6,9 @@ export async function middleware(req: NextRequest) {
   const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET })
   const { pathname } = req.nextUrl
 
-  // ต้องล็อกอินจึงเข้า /dashboard หรือ /profile ได้
-  if ((pathname.startsWith('/dashboard') || pathname.startsWith('/profile')) && !token) {
+  // ป้องกันหน้า Profile - ต้องล็อกอิน (ทุก role)
+  // และหน้า Dashboard (สำหรับผู้ใช้ทั่วไป)
+  if (pathname.startsWith('/profile') && !token) {
     return NextResponse.redirect(new URL('/login', req.url))
   }
 
@@ -33,5 +34,10 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/admin/:path*', '/profile/:path*', '/api/admin/:path*'],
+  matcher: [
+    '/dashboard/:path*',
+    '/admin/:path*',
+    '/profile/:path*',
+    '/api/admin/:path*',
+  ],
 }

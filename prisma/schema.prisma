@@ -1,40 +1,41 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
-  //  output   = "../app/generated/prisma"
+  output   = "../app/generated/prisma"
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider = "sqlite"
+  url      = "file:./dev.db"
 }
 
-
-model student {
-  id  Int @id @default(autoincrement())
-  firstName        String 
-  lastName String 
-  major String 
-  faculty String 
-  email String @unique
-  phone String 
-  createdAt   DateTime @default(now()) 
-  updatedAt   DateTime @default(now()) 
-
-
+model User {
+  id        String   @id @default(cuid())
+  username  String   @unique
+  password  String
+  role      Role     @default(user)
+  image     String?  // <-- เพิ่ม field สำหรับเก็บ URL รูปโปรไฟล์
+  createdAt DateTime @default(now()) @updatedAt
 }
 
+enum Role {
+  user
+  admin
+  teacher
+  student // <-- เพิ่ม role ใหม่ตรงนี้
+}
 
-model User { 
-id        String   @id @default(uuid())      // primary key แบบ UUID ช่วยป้องกันการเดา id ง่ายๆ 
-username  String   @unique
-password  String                              // เก็บเฉพาะรหัสผ่านที่ 'hash' แล้วเท่านั้น 
-role String   @default("user")          // "user" หรือ "admin" ใช้สําหรับ RBAC 
-createdAt DateTime @default(now())           // บันทึกเวลาสร้าง 
-updatedAt DateTime @updatedAt
-} 
+model Student {
+  id        Int      @id @default(autoincrement())
+  firstName String
+  lastName  String
+  major     String
+  faculty   String
+  email     String   @unique
+  phone     String?
+  price     Float? // เพิ่ม field นี้ตาม schema ที่ตรวจพบ
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

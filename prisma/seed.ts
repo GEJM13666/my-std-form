@@ -1,7 +1,7 @@
 // prisma/seed.ts 
-import { PrismaClient } from "@prisma/client"; 
-const prisma = new PrismaClient(); 
- import { hash } from 'bcryptjs';
+const { PrismaClient } = require("../app/generated/prisma");
+const prisma = new PrismaClient();
+const { hash } = require('bcryptjs');
 
  
 async function seedSTD() {
@@ -55,7 +55,6 @@ async function seedSTD() {
  
 async function main() { 
   await seedSTD(); 
-  console.log(" Seeded data successfully!"); 
 
     const adminUsername = 'admin';
   const adminPassword = 'admin123'; // ปกติควรเก็บใน .env แล้วอ่านจาก process.env
@@ -77,10 +76,57 @@ async function main() {
       username: adminUsername,
       password: hashedPassword,
       role: 'admin',
+      image: null,
     },
   });
 
   console.log('✅ Admin user created:', adminUser);
+
+  // --- เพิ่มส่วนสำหรับสร้าง Teacher ---
+  const teacherUsername = 'teacher';
+  const teacherPassword = 'teacher123';
+
+  const existingTeacher = await prisma.user.findUnique({
+    where: { username: teacherUsername },
+  });
+
+  if (existingTeacher) {
+    console.log('Teacher user already exists');
+  } else {
+    const hashedTeacherPassword = await hash(teacherPassword, 10);
+    await prisma.user.create({
+      data: {
+        username: teacherUsername,
+        password: hashedTeacherPassword,
+        role: 'teacher',
+        image: null,
+      },
+    });
+    console.log('✅ Teacher user created');
+  }
+
+  // --- เพิ่มส่วนสำหรับสร้าง Student User ---
+  const studentUsername = 'student';
+  const studentPassword = 'student123';
+
+  const existingStudentUser = await prisma.user.findUnique({
+    where: { username: studentUsername },
+  });
+
+  if (existingStudentUser) {
+    console.log('Student user already exists');
+  } else {
+    const hashedStudentPassword = await hash(studentPassword, 10);
+    await prisma.user.create({
+      data: {
+        username: studentUsername,
+        password: hashedStudentPassword,
+        role: 'student',
+        image: null,
+      },
+    });
+    console.log('✅ Student user created');
+  }
 } 
 
 

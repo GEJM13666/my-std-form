@@ -1,23 +1,47 @@
 'use client'
 
-import StudentList from "./component/StudentList";
-import Navbar from "./component/Navbar";
-import Footer from "./component/Footer";
-import { Box, Container } from "@mui/material";
+import Link from 'next/link'
+import { useSession, signOut } from 'next-auth/react'
+import { Container, Typography, Button, CircularProgress } from '@mui/material'
+import StudentList from './component/StudentList'
 
 export default function Home() {
-  return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      <Navbar />
+  const { data: session, status } = useSession()
 
-      {/* Main content */}
-      <Container component="main" sx={{ mt: 4, mb: 4, flex: 1 }}>
-        {/* StudentList will be at the top of the container */}
+  // ขณะรอข้อมูล session
+  if (status === 'loading') {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <CircularProgress />
+      </div>
+    )
+  }
+
+  // ถ้าเป็น admin หรือ teacher ให้แสดงหน้า StudentList
+  if (status === 'authenticated' && (session.user?.role === 'admin' || session.user?.role === 'teacher')) {
+    return (
+      <Container>
         <StudentList />
       </Container>
-      
-      {/* Footer stays at the bottom */}
-      <Footer />
-    </Box>
-  );
+    )
+  }
+
+  // สำหรับผู้ใช้ทั่วไป (เช่น role 'student') และ guest
+  return (
+    <Container sx={{ textAlign: 'center', mt: 4 }}>
+      <Typography variant="h2" component="h1" gutterBottom>
+        ยินดีต้อนรับสู่ระบบจัดการนักศึกษา
+      </Typography>
+      <Typography variant="h5" color="text.secondary" paragraph>
+        ระบบที่ช่วยให้การจัดการข้อมูลนักศึกษาง่ายและมีประสิทธิภาพ
+      </Typography>
+      {status === 'authenticated' && (
+        <Typography variant="h6" sx={{ mt: 4 }}>
+          เข้าสู่ระบบในฐานะ {session.user?.role}.
+          <br />
+          <Link href="/dashboard" passHref><Button variant="contained" sx={{ mt: 2 }}>ไปยัง Dashboard ของคุณ</Button></Link>
+        </Typography>
+      )}
+    </Container>
+  )
 }

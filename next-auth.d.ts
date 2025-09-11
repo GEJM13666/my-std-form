@@ -10,6 +10,7 @@ declare module 'next-auth' {
       id: string
       username: string
       role: string
+      image?: string | null // <-- เพิ่ม image
     } & DefaultSession['user'] // To keep the default properties
   }
 
@@ -20,6 +21,7 @@ declare module 'next-auth' {
   interface User extends DefaultUser {
     username: string
     role: string
+    image?: string | null // <-- เพิ่ม image
   }
 }
 
@@ -29,5 +31,6 @@ declare module 'next-auth/jwt' {
     id: string
     username: string
     role: string
+    image?: string | null // <-- เพิ่ม image
   }
 }

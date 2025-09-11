@@ -6,7 +6,7 @@ import { useSession } from 'next-auth/react'
 interface User {
   id: string
   username: string
-  role: 'admin' | 'user'
+  role: 'admin' | 'user' | 'teacher' | 'student'
   createdAt: string
 }
 
@@ -42,7 +42,7 @@ export default function UserManagement() {
     fetchUsers()
   }, [])
 
-  const handleRoleChange = async (userId: string, newRole: 'admin' | 'user') => {
+  const handleRoleChange = async (userId: string, newRole: 'admin' | 'user' | 'teacher' | 'student') => {
     try {
       const res = await fetch(`/api/admin/users/${userId}`, {
         method: 'PUT',
@@ -101,8 +101,10 @@ export default function UserManagement() {
             <tr key={user.id} className="hover:bg-gray-50">
               <td className="py-4 px-4 whitespace-nowrap">{user.username}</td>
               <td className="py-4 px-4 whitespace-nowrap"> 
-                <select value={user.role} onChange={(e) => handleRoleChange(user.id, e.target.value as 'admin' | 'user')} disabled={user.id === session?.user?.id} className="p-1 border rounded-md disabled:bg-gray-200 disabled:cursor-not-allowed">
+                <select value={user.role} onChange={(e) => handleRoleChange(user.id, e.target.value as 'admin' | 'user' | 'teacher' | 'student')} disabled={user.id === session?.user?.id} className="p-1 border rounded-md disabled:bg-gray-200 disabled:cursor-not-allowed">
                   <option value="user">User</option>
+                  <option value="student">Student</option>
+                  <option value="teacher">Teacher</option>
                   <option value="admin">Admin</option>
                 </select>
               </td>
